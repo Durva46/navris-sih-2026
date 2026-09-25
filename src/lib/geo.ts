@@ -27,8 +27,19 @@ export const DEMO_ORIGIN: GeoOrigin = {
   alt: 920,
 };
 
-export function metresPerDegreeLat(): number {
-  return (Math.PI / 180) * (R_EARTH * (1 - 0.00669437999014 * Math.sin(77.5 * RAD) ** 2));
+/**
+ * Metres per degree of latitude at a given latitude.
+ *
+ * The meridian radius of curvature varies with latitude, and this was previously
+ * hardcoded to 77.5 degrees while the longitude scale correctly used the origin
+ * latitude. That inconsistency was harmless while the map was an abstract canvas
+ * in arbitrary units, but it is a real error now that positions are drawn against
+ * a real basemap: at the demo origin it skewed every north offset by ~0.6%, which
+ * is metres of visible displacement over a single outage. Both scales are now
+ * evaluated at the same latitude.
+ */
+export function metresPerDegreeLat(atLat: number): number {
+  return (Math.PI / 180) * (R_EARTH * (1 - 0.00669437999014 * Math.sin(atLat * RAD) ** 2));
 }
 
 export function metresPerDegreeLon(atLat: number): number {
@@ -36,7 +47,7 @@ export function metresPerDegreeLon(atLat: number): number {
 }
 
 export function enuToPosition(origin: GeoOrigin, enu: EnuOffset): Position {
-  const dLat = enu.north / metresPerDegreeLat();
+  const dLat = enu.north / metresPerDegreeLat(origin.lat);
   const dLon = enu.east / metresPerDegreeLon(origin.lat);
   return {
     lat: origin.lat + dLat,
@@ -48,7 +59,7 @@ export function enuToPosition(origin: GeoOrigin, enu: EnuOffset): Position {
 export function positionToEnu(origin: GeoOrigin, p: Position): EnuOffset {
   return {
     east: (p.lon - origin.lon) * metresPerDegreeLon(origin.lat),
-    north: (p.lat - origin.lat) * metresPerDegreeLat(),
+    north: (p.lat - origin.lat) * metresPerDegreeLat(origin.lat),
     up: p.alt - origin.alt,
   };
 }

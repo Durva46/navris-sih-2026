@@ -1,7 +1,7 @@
 import { getAdapter } from '@/adapters';
 import type { AdapterControl, AdapterHandlers } from '@/adapters/DataAdapter';
 import { navigationStore } from '@/nav/store';
-import type { ScenarioId } from '@/types/navigation';
+import type { DataSourceMode, ScenarioId } from '@/types/navigation';
 import {
   createContext,
   useCallback,
@@ -43,6 +43,15 @@ export interface NavigationUiState {
   aiContribution: boolean;
   scenario: ScenarioId;
   playbackSpeed: number;
+  /**
+   * What kind of data the operator is looking at: `demo`, `live`, or `research`.
+   *
+   * Read once from the active adapter, which is the only place in the app that
+   * knows which adapter is mounted. Components label themselves from this field
+   * and never from an adapter identity — which is what lets a new adapter ship
+   * with correct labels and zero component edits.
+   */
+  dataSourceMode: DataSourceMode;
   /** Monotonic counter used to key re-renders of the event timeline. */
   eventVersion: number;
 }
@@ -71,6 +80,9 @@ const INITIAL_UI: NavigationUiState = {
   aiContribution: true,
   scenario: 'gnss-blackout',
   playbackSpeed: 1,
+  // Resolved from the mounted adapter. The adapter cannot change without a
+  // reload (see `setAdapterId`), so this is stable for the app's lifetime.
+  dataSourceMode: getAdapter().mode,
   eventVersion: 0,
 };
 

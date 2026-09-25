@@ -3,7 +3,7 @@ import { navigationStore } from '@/nav/store';
 import { useTelemetry } from '@/nav/hooks';
 import { useNavigationUi } from '@/nav/NavigationContext';
 import { selectStateSummary, selectStateVisual } from '@/nav/selectors';
-import { DemoBadge, Divider, Panel, ReadoutDef, ReadoutGrid, ReadoutTerm, StatusDot } from '@/components/ui/primitives';
+import { DataSourceBadge, Divider, Panel, ReadoutDef, ReadoutGrid, ReadoutTerm, StatusDot } from '@/components/ui/primitives';
 import type { DataSourceLabel } from '@/types/navigation';
 import { formatDuration, formatMissionTime, formatPercent } from '@/lib/format';
 import { SCENARIOS } from '@/sim/scenarios';
@@ -11,7 +11,7 @@ import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 /**
- * The System panel — progressive disclosure.
+ * The System panel â€” progressive disclosure.
  *
  * Everything in here is for someone who already believes the headline and wants
  * to check it: the raw filter statistics, the sensor error estimates, the
@@ -57,7 +57,7 @@ export function SystemPanel({ open, onClose }: { open: boolean; onClose: () => v
           style={{ boxShadow: `inset 3px 0 0 ${visual.border}` }}
         >
           <h2 className="panel-title">System</h2>
-          <DemoBadge compact />
+          <DataSourceBadge compact />
           <button type="button" onClick={onClose} className="btn btn-ghost ml-auto !px-1.5 !py-1">
             <X size={14} />
           </button>
@@ -95,20 +95,20 @@ export function SystemPanel({ open, onClose }: { open: boolean; onClose: () => v
               <div className="px-3 py-2">
                 <ReadoutGrid>
                   <ReadoutTerm>Fix type</ReadoutTerm>
-                  <ReadoutDef>{frame?.gnss.fixType ?? '—'}</ReadoutDef>
+                  <ReadoutDef>{frame?.gnss.fixType ?? 'â€”'}</ReadoutDef>
                   <ReadoutTerm>Satellites</ReadoutTerm>
                   <ReadoutDef>
                     {frame?.gnss.satellitesUsed ?? 0} used / {frame?.gnss.satellitesVisible ?? 0} visible
                   </ReadoutDef>
                   <ReadoutTerm>HDOP</ReadoutTerm>
-                  <ReadoutDef>{frame?.gnss.hdop.toFixed(2) ?? '—'}</ReadoutDef>
-                  <ReadoutTerm>C/N₀</ReadoutTerm>
-                  <ReadoutDef>{frame ? `${frame.gnss.cn0.toFixed(1)} dB-Hz` : '—'}</ReadoutDef>
+                  <ReadoutDef>{frame?.gnss.hdop.toFixed(2) ?? 'â€”'}</ReadoutDef>
+                  <ReadoutTerm>C/Nâ‚€</ReadoutTerm>
+                  <ReadoutDef>{frame ? `${frame.gnss.cn0.toFixed(1)} dB-Hz` : 'â€”'}</ReadoutDef>
                   <ReadoutTerm>Time since fix</ReadoutTerm>
                   <ReadoutDef
                     color={frame && frame.gnss.secondsSinceFix > 1 ? '#FDBA74' : undefined}
                   >
-                    {frame?.gnss.secondsSinceFix.toFixed(2) ?? '—'} s
+                    {frame?.gnss.secondsSinceFix.toFixed(2) ?? 'â€”'} s
                   </ReadoutDef>
                 </ReadoutGrid>
               </div>
@@ -118,33 +118,33 @@ export function SystemPanel({ open, onClose }: { open: boolean; onClose: () => v
               <div className="px-3 py-2">
                 <ReadoutGrid>
                   <ReadoutTerm>Health</ReadoutTerm>
-                  <ReadoutDef>{frame?.imu.health ?? '—'}</ReadoutDef>
+                  <ReadoutDef>{frame?.imu.health ?? 'â€”'}</ReadoutDef>
                   <ReadoutTerm>Sample rate</ReadoutTerm>
                   <ReadoutDef>{frame?.imu.sampleRateHz ?? 0} Hz</ReadoutDef>
                   <ReadoutTerm>Attitude</ReadoutTerm>
                   <ReadoutDef>
-                    {frame ? `${frame.imu.roll.toFixed(2)}° / ${frame.imu.pitch.toFixed(2)}° / ${frame.imu.yaw.toFixed(2)}°` : '—'}
+                    {frame ? `${frame.imu.roll.toFixed(2)}Â° / ${frame.imu.pitch.toFixed(2)}Â° / ${frame.imu.yaw.toFixed(2)}Â°` : 'â€”'}
                   </ReadoutDef>
                   <ReadoutTerm>Specific force</ReadoutTerm>
                   <ReadoutDef>
                     {frame
-                      ? `${frame.imu.accel.x.toFixed(3)}, ${frame.imu.accel.y.toFixed(3)}, ${frame.imu.accel.z.toFixed(3)} m/s²`
-                      : '—'}
+                      ? `${frame.imu.accel.x.toFixed(3)}, ${frame.imu.accel.y.toFixed(3)}, ${frame.imu.accel.z.toFixed(3)} m/sÂ²`
+                      : 'â€”'}
                   </ReadoutDef>
                   <ReadoutTerm>Angular rate</ReadoutTerm>
                   <ReadoutDef>
                     {frame
-                      ? `${frame.imu.gyro.x.toFixed(3)}, ${frame.imu.gyro.y.toFixed(3)}, ${frame.imu.gyro.z.toFixed(3)} °/s`
-                      : '—'}
+                      ? `${frame.imu.gyro.x.toFixed(3)}, ${frame.imu.gyro.y.toFixed(3)}, ${frame.imu.gyro.z.toFixed(3)} Â°/s`
+                      : 'â€”'}
                   </ReadoutDef>
                   <ReadoutTerm>Accel bias est.</ReadoutTerm>
                   <ReadoutDef>
                     {frame
-                      ? `${frame.imu.accelBias.x.toFixed(4)}, ${frame.imu.accelBias.y.toFixed(4)} m/s²`
-                      : '—'}
+                      ? `${frame.imu.accelBias.x.toFixed(4)}, ${frame.imu.accelBias.y.toFixed(4)} m/sÂ²`
+                      : 'â€”'}
                   </ReadoutDef>
                   <ReadoutTerm>Die temperature</ReadoutTerm>
-                  <ReadoutDef>{frame?.imu.temperatureC.toFixed(1) ?? '—'} °C</ReadoutDef>
+                  <ReadoutDef>{frame?.imu.temperatureC.toFixed(1) ?? 'â€”'} Â°C</ReadoutDef>
                 </ReadoutGrid>
               </div>
             </Panel>
@@ -153,15 +153,15 @@ export function SystemPanel({ open, onClose }: { open: boolean; onClose: () => v
               <div className="px-3 py-2">
                 <ReadoutGrid>
                   <ReadoutTerm>Health</ReadoutTerm>
-                  <ReadoutDef>{frame?.eskf.health ?? '—'}</ReadoutDef>
+                  <ReadoutDef>{frame?.eskf.health ?? 'â€”'}</ReadoutDef>
                   <ReadoutTerm>Error states</ReadoutTerm>
                   <ReadoutDef>{frame?.eskf.errorStates ?? 0}</ReadoutDef>
                   <ReadoutTerm>NIS</ReadoutTerm>
                   <ReadoutDef
                     color={frame && frame.eskf.nis > 9 ? '#FBBF4C' : undefined}
-                    title="Normalised Innovation Squared — the 2-DOF chi-square gate threshold is 9.3"
+                    title="Normalised Innovation Squared â€” the 2-DOF chi-square gate threshold is 9.3"
                   >
-                    {frame?.eskf.nis.toFixed(3) ?? '—'}
+                    {frame?.eskf.nis.toFixed(3) ?? 'â€”'}
                   </ReadoutDef>
                   <ReadoutTerm>Accepted</ReadoutTerm>
                   <ReadoutDef color="#6EE7B7">{frame?.eskf.updatesAccepted ?? 0}</ReadoutDef>
@@ -171,14 +171,14 @@ export function SystemPanel({ open, onClose }: { open: boolean; onClose: () => v
                   </ReadoutDef>
                   <ReadoutTerm>Inertial only</ReadoutTerm>
                   <ReadoutDef>{frame?.eskf.inertialOnly ? 'YES' : 'NO'}</ReadoutDef>
-                  <ReadoutTerm>σ East</ReadoutTerm>
-                  <ReadoutDef>{frame?.navris.uncertainty.sigmaEast.toFixed(3) ?? '—'} m</ReadoutDef>
-                  <ReadoutTerm>σ North</ReadoutTerm>
-                  <ReadoutDef>{frame?.navris.uncertainty.sigmaNorth.toFixed(3) ?? '—'} m</ReadoutDef>
+                  <ReadoutTerm>Ïƒ East</ReadoutTerm>
+                  <ReadoutDef>{frame?.navris.uncertainty.sigmaEast.toFixed(3) ?? 'â€”'} m</ReadoutDef>
+                  <ReadoutTerm>Ïƒ North</ReadoutTerm>
+                  <ReadoutDef>{frame?.navris.uncertainty.sigmaNorth.toFixed(3) ?? 'â€”'} m</ReadoutDef>
                   <ReadoutTerm>Correlation</ReadoutTerm>
-                  <ReadoutDef>{frame?.navris.uncertainty.correlation.toFixed(3) ?? '—'}</ReadoutDef>
-                  <ReadoutTerm>σ heading</ReadoutTerm>
-                  <ReadoutDef>{frame?.navris.uncertainty.sigmaHeadingDeg.toFixed(3) ?? '—'}°</ReadoutDef>
+                  <ReadoutDef>{frame?.navris.uncertainty.correlation.toFixed(3) ?? 'â€”'}</ReadoutDef>
+                  <ReadoutTerm>Ïƒ heading</ReadoutTerm>
+                  <ReadoutDef>{frame?.navris.uncertainty.sigmaHeadingDeg.toFixed(3) ?? 'â€”'}Â°</ReadoutDef>
                 </ReadoutGrid>
               </div>
             </Panel>
@@ -199,18 +199,18 @@ export function SystemPanel({ open, onClose }: { open: boolean; onClose: () => v
                   <ReadoutTerm>Predicted error</ReadoutTerm>
                   <ReadoutDef>
                     {frame
-                      ? `${frame.ai.predictedError.x.toFixed(4)}, ${frame.ai.predictedError.y.toFixed(4)} m/s²`
-                      : '—'}
+                      ? `${frame.ai.predictedError.x.toFixed(4)}, ${frame.ai.predictedError.y.toFixed(4)} m/sÂ²`
+                      : 'â€”'}
                   </ReadoutDef>
                   <ReadoutTerm>Inference</ReadoutTerm>
-                  <ReadoutDef>{frame ? `${frame.ai.inferenceMs.toFixed(2)} ms` : '—'}</ReadoutDef>
+                  <ReadoutDef>{frame ? `${frame.ai.inferenceMs.toFixed(2)} ms` : 'â€”'}</ReadoutDef>
                   <ReadoutTerm>Corrections</ReadoutTerm>
                   <ReadoutDef>{frame?.ai.correctionsApplied ?? 0}</ReadoutDef>
                 </ReadoutGrid>
                 <Divider />
                 <p className="text-[10px] leading-snug text-ink-dim">
                   The model contributes a bias estimate, which enters the filter as a measurement.
-                  It is not a navigation solution and it is not the source of truth — GNSS is, when
+                  It is not a navigation solution and it is not the source of truth â€” GNSS is, when
                   it is available.
                 </p>
               </div>
@@ -258,7 +258,7 @@ export function SystemPanel({ open, onClose }: { open: boolean; onClose: () => v
                   <ReadoutTerm>Model self-report</ReadoutTerm>
                   <ReadoutDef>{formatPercent(frame?.ai.modelConfidence ?? 0, 1)}</ReadoutDef>
                   <ReadoutTerm>AI output applied</ReadoutTerm>
-                  <ReadoutDef>{aiContribution ? 'yes' : 'no — display only'}</ReadoutDef>
+                  <ReadoutDef>{aiContribution ? 'yes' : 'no â€” display only'}</ReadoutDef>
                   <ReadoutTerm>Samples recorded</ReadoutTerm>
                   <ReadoutDef>{navigationStore.history.length}</ReadoutDef>
                   <ReadoutTerm>Trajectory points</ReadoutTerm>
@@ -267,7 +267,7 @@ export function SystemPanel({ open, onClose }: { open: boolean; onClose: () => v
                   </ReadoutDef>
                 </ReadoutGrid>
                 <p className="mt-2 text-[10px] leading-snug text-ink-dim">
-                  Motion features → AI error estimation → correction → ESKF fusion → navigation
+                  Motion features â†’ AI error estimation â†’ correction â†’ ESKF fusion â†’ navigation
                   solution. The uncertainty reported to the operator is the filter's own covariance,
                   never a model output.
                 </p>

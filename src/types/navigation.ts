@@ -236,8 +236,46 @@ export interface Trajectory {
 /**
  * Provenance of a value or event. `MEASURED` is reserved for data that came from
  * real hardware and has been verified — the mock pipeline must never emit it.
+ *
+ * `RECORDED` covers replayed research datasets. It is deliberately distinct from
+ * `MEASURED`: a recorded run is a real measurement that happened at some other
+ * time, and a replay adapter cannot assert that the recording is currently
+ * true. Collapsing the two would let a research overlay claim live authority.
  */
-export type DataSourceLabel = 'DEMO_SIMULATED' | 'MEASURED';
+export type DataSourceLabel = 'DEMO_SIMULATED' | 'MEASURED' | 'RECORDED';
+
+/**
+ * First-class description of what kind of data the active stream carries.
+ *
+ * This exists so the UI can branch on the *nature of the data* and never on the
+ * adapter implementation. `if (adapter === MockAdapter)` in a component is a
+ * layering violation; `if (dataSourceMode === 'demo')` is not.
+ */
+export type DataSourceMode = 'demo' | 'live' | 'research';
+
+/**
+ * Operator-facing copy for each mode. The UI renders these; it never invents its
+ * own wording per adapter.
+ */
+export const DATA_SOURCE_MODE_LABEL: Readonly<Record<DataSourceMode, string>> = {
+  demo: 'Simulation / Demo Mode',
+  live: 'Live / Measured',
+  research: 'Research / Replay',
+};
+
+/** One-line explanation of what a mode means, for tooltips and the system panel. */
+export const DATA_SOURCE_MODE_DETAIL: Readonly<Record<DataSourceMode, string>> = {
+  demo: 'Deterministic simulated navigation. No real sensor or GNSS receiver is involved.',
+  live: 'Navigation data from real hardware or a live backend feed.',
+  research: 'Recorded dataset replayed for analysis. Not a live solution.',
+};
+
+/** Provenance label for each mode, used when a stream has no more specific value. */
+export const DATA_SOURCE_MODE_LABEL_PROVENANCE: Readonly<Record<DataSourceMode, DataSourceLabel>> = {
+  demo: 'DEMO_SIMULATED',
+  live: 'MEASURED',
+  research: 'RECORDED',
+};
 
 /** Aggregate performance metrics. Only meaningful in DEMO_SIMULATED mode. */
 export interface NavigationErrorMetrics {
@@ -274,6 +312,14 @@ export interface NavigationFrame {
   /** Region currently shadowing GNSS, in local ENU metres. Null when clear. */
   outageRegion: OutageRegion | null;
   source: DataSourceLabel;
+  /**
+   * Mode of the stream that produced this frame.
+   *
+   * Carried per frame, not just on the adapter, so a frame written to disk stays
+   * self-describing: a replay of recorded data must still declare that it is
+   * research data, months later, with no adapter in scope to ask.
+   */
+  sourceMode: DataSourceMode;
 }
 
 /** A GNSS-denied region (tunnel, urban canyon, blackout) in local ENU metres. */

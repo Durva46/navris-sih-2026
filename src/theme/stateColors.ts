@@ -219,4 +219,5 @@ export const AI_STAGE_LABELS: Readonly<Record<AIPipelineStage, string>> = {
 export const DATA_SOURCE_LABEL: Readonly<Record<DataSourceLabel, string>> = {
   DEMO_SIMULATED: 'Demo / Simulated',
   MEASURED: 'Measured',
+  RECORDED: 'Recorded / Research',
 };

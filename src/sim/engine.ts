@@ -37,6 +37,7 @@ import { SCENARIOS, SEQUENCE_TIMING } from '@/sim/scenarios';
 import { NavigationStateMachine, type MachineTime, type Transition } from '@/sim/stateMachine';
 import type {
   AIStatus,
+  DataSourceMode,
   EnuOffset,
   GNSSStatus,
   IMUStatus,
@@ -135,6 +136,13 @@ export interface EngineControl {
 }
 
 export class SimulationEngine {
+  /**
+   * Every frame this engine produces is simulated, by construction — there is no
+   * code path through it that consumes a real measurement. The mode is declared
+   * here rather than inferred downstream so that nothing has to guess.
+   */
+  readonly sourceMode: DataSourceMode = 'demo';
+
   private scenario: ScenarioProfile;
   private machine: NavigationStateMachine;
   private rng: Rng;
@@ -476,9 +484,10 @@ export class SimulationEngine {
         headingError: Math.abs(((headingDeg - this.trueHeading + 540) % 360) - 180),
         errorOverSigma: sigma > 1e-3 ? positionError / sigma : 0,
       },
-      outageRegion: denying ? this.currentOutageRegion() : null,
-      source: 'DEMO_SIMULATED',
-    };
+        outageRegion: denying ? this.currentOutageRegion() : null,
+        source: 'DEMO_SIMULATED',
+        sourceMode: this.sourceMode,
+      };
 
     const navrisPoint: TrajectoryPoint = {
       t: this.t,
@@ -1124,7 +1133,7 @@ function symmetrise6(P: Matrix): void {
 function positionToEnu(origin: GeoOrigin, p: { lat: number; lon: number; alt: number }): EnuOffset {
   return {
     east: (p.lon - origin.lon) * metresPerDegreeLon(origin.lat),
-    north: (p.lat - origin.lat) * metresPerDegreeLat(),
+    north: (p.lat - origin.lat) * metresPerDegreeLat(origin.lat),
     up: p.alt - origin.alt,
   };
 }

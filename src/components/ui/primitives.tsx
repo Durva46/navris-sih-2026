@@ -1,7 +1,13 @@
+import { useNavigationUi } from '@/nav/NavigationContext';
+import {
+  DATA_SOURCE_MODE_DETAIL,
+  DATA_SOURCE_MODE_LABEL,
+  type DataSourceMode,
+} from '@/types/navigation';
 import type { ReactNode } from 'react';
 
 /**
- * Base primitives. Deliberately small and unopinionated — the instrument look
+ * Base primitives. Deliberately small and unopinionated - the instrument look
  * comes from hairlines, monospace numerals and the state colour table, not from
  * a component library.
  */
@@ -159,22 +165,59 @@ export function StatusDot({ color, pulse = false, size = 7 }: { color: string; p
 }
 
 /**
- * The permanent provenance label. Nothing in this UI may be mistaken for
- * measured hardware data while running on the mock, so this is not a badge you
- * can turn off — it is chrome.
+ * The permanent provenance label.
+ *
+ * This is not a badge you can turn off — it is chrome, and it is the reason a
+ * viewer can never mistake a simulated number for a measurement. It reads the
+ * mode from the navigation service rather than hard-coding "demo", so a live
+ * feed and a research replay each announce themselves correctly, and so a future
+ * adapter needs no edit here to be labelled honestly.
  */
-export function DemoBadge({ compact = false }: { compact?: boolean }) {
+export function DataSourceBadge({ compact = false }: { compact?: boolean }) {
+  const { dataSourceMode } = useNavigationUi();
+  const spec = DATA_SOURCE_BADGE[dataSourceMode];
   return (
     <span
-      className="readout inline-flex items-center gap-1.5 border border-degraded/40 bg-degraded/[0.07] px-2 py-1
-                 text-micro font-medium uppercase tracking-[0.14em] text-degraded-soft"
-      title="All values on this screen are produced by a client-side simulation. They are not measurements from real hardware."
+      className={`readout inline-flex items-center gap-1.5 border px-2 py-1
+                  text-micro font-medium uppercase tracking-[0.14em] ${spec.className}`}
+      title={DATA_SOURCE_MODE_DETAIL[dataSourceMode]}
     >
-      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-degraded" />
-      {compact ? 'SIM' : 'SIMULATION / DEMO MODE'}
+      <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${spec.dot}`} />
+      {compact ? spec.short : spec.long}
     </span>
   );
 }
+
+/**
+ * Per-mode presentation for the provenance badge.
+ *
+ * Presentation is keyed on the *mode*, never on an adapter, so a new adapter
+ * appears correctly labelled without touching this file. Each mode gets a
+ * distinct colour as well as distinct wording, so the distinction survives for
+ * anyone who cannot rely on reading the text.
+ */
+const DATA_SOURCE_BADGE: Readonly<
+  Record<DataSourceMode, { short: string; long: string; className: string; dot: string }>
+> = {
+  demo: {
+    short: 'SIM',
+    long: DATA_SOURCE_MODE_LABEL.demo,
+    className: 'border-degraded/40 bg-degraded/[0.07] text-degraded-soft',
+    dot: 'bg-degraded',
+  },
+  live: {
+    short: 'LIVE',
+    long: DATA_SOURCE_MODE_LABEL.live,
+    className: 'border-nominalGreen/40 bg-nominalGreen/[0.07] text-nominalGreen',
+    dot: 'bg-nominalGreen',
+  },
+  research: {
+    short: 'REPLAY',
+    long: DATA_SOURCE_MODE_LABEL.research,
+    className: 'border-ai/40 bg-ai/[0.07] text-ai-soft',
+    dot: 'bg-ai',
+  },
+};
 
 /** Section divider with an optional label — used inside dense panels. */
 export function Divider({ label }: { label?: string }) {

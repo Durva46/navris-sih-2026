@@ -1,5 +1,6 @@
 import type {
   DataSourceLabel,
+  DataSourceMode,
   NavigationEvent,
   NavigationFrame,
   ScenarioId,
@@ -16,7 +17,7 @@ import type {
  * the interface is wrong — extend it here instead.
  */
 
-export type AdapterId = 'mock' | 'api' | 'websocket';
+export type AdapterId = 'mock' | 'replay' | 'api' | 'websocket' | 'device';
 
 export interface AdapterControl {
   scenario: ScenarioId;
@@ -68,6 +69,17 @@ export interface DataAdapter {
    * accidentally making an accuracy claim it cannot support.
    */
   readonly source: DataSourceLabel;
+  /**
+   * What kind of stream this is, independent of `source`.
+   *
+   * `source` answers "where did this number come from"; `mode` answers "what
+   * kind of session is the operator in". A recorded replay is `research` and
+   * `RECORDED`; a simulated run is `demo` and `DEMO_SIMULATED`. Components
+   * branch on this, never on the adapter identity — so adding a new adapter
+   * never requires editing a component, and the UI can label itself correctly
+   * from the mode alone.
+   */
+  readonly mode: DataSourceMode;
   readonly status: AdapterStatus;
 
   /** Begin emitting frames. Returns a teardown function. */
@@ -92,6 +104,7 @@ export interface DataAdapter {
 export abstract class BaseAdapter implements DataAdapter {
   abstract readonly id: AdapterId;
   abstract readonly source: DataSourceLabel;
+  abstract readonly mode: DataSourceMode;
 
   protected control: AdapterControl = { ...DEFAULT_ADAPTER_CONTROL };
   protected handlers: AdapterHandlers | null = null;

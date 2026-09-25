@@ -16,6 +16,7 @@ import { SimulationEngine } from '@/sim/engine';
 export class MockAdapter extends BaseAdapter {
   readonly id = 'mock' as const;
   readonly source = 'DEMO_SIMULATED' as const;
+  readonly mode = 'demo' as const;
 
   private engine: SimulationEngine;
   private rafHandle: number | null = null;

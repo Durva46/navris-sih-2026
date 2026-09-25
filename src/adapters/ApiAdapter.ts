@@ -24,7 +24,14 @@ import type { DataSourceLabel, NavigationFrame } from '@/types/navigation';
  */
 export class ApiAdapter extends BaseAdapter {
   readonly id = 'api' as const;
+  /**
+   * Remains DEMO_SIMULATED while this is a stub. Flipping it to MEASURED must
+   * happen in the same change that makes this adapter emit real frames from real
+   * hardware — never on its own, or the UI would label invented numbers as
+   * measured.
+   */
   readonly source: DataSourceLabel = 'DEMO_SIMULATED';
+  readonly mode = 'live' as const;
 
   private baseUrl = '/api/v1/nav';
   private pollHandle: number | null = null;

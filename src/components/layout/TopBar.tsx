@@ -1,6 +1,6 @@
 import { Wordmark } from '@/components/brand/Wordmark';
 import { SystemStateIndicator } from '@/components/status/SystemStateIndicator';
-import { DemoBadge } from '@/components/ui/primitives';
+import { DataSourceBadge } from '@/components/ui/primitives';
 import { useNavigationCommands, useNavigationUi } from '@/nav/NavigationContext';
 import { useTelemetry } from '@/nav/hooks';
 import { selectStateVisual } from '@/nav/selectors';
@@ -13,8 +13,8 @@ import { NavLink } from 'react-router-dom';
 /**
  * The persistent top bar.
  *
- * Layout priority, left to right, is deliberate: wordmark → the system state
- * (the largest thing on screen) → data provenance → view navigation. A judge
+ * Layout priority, left to right, is deliberate: wordmark â†’ the system state
+ * (the largest thing on screen) â†’ data provenance â†’ view navigation. A judge
  * standing at the back of the room reads only the middle group, and it has to
  * be legible without effort.
  */
@@ -63,7 +63,7 @@ export function TopBar() {
           </span>
         )}
 
-        <DemoBadge />
+        <DataSourceBadge />
 
         <button
           type="button"
@@ -122,7 +122,7 @@ export function TopBar() {
         <span className="label-micro leading-none">Scenario</span>
         <span className="readout mt-1 text-[11px] text-ink-muted">
           {scenario.name}
-          {manualOverride && <span className="ml-1.5 text-ai-soft">· manual</span>}
+          {manualOverride && <span className="ml-1.5 text-ai-soft">Â· manual</span>}
         </span>
       </div>
     </header>

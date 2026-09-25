@@ -1,4 +1,4 @@
-import { DemoBadge } from '@/components/ui/primitives';
+import { DataSourceBadge } from '@/components/ui/primitives';
 import { useNavigationCommands, useNavigationUi } from '@/nav/NavigationContext';
 import { useTelemetry } from '@/nav/hooks';
 import { selectStateVisual } from '@/nav/selectors';
@@ -22,7 +22,7 @@ import { useState } from 'react';
  * A drawer attached to Live Navigation, deliberately *not* a route: the map must
  * never leave the screen while an operator is driving the demo. The one rule
  * this panel enforces above all others is that a presenter always has manual
- * control — no transition in the product is reachable only by a timer.
+ * control â€” no transition in the product is reachable only by a timer.
  */
 export function SimulationDrawer() {
   const { simulationOpen, scenario, paused, manualOverride, playbackSpeed, aiContribution } =
@@ -58,7 +58,7 @@ export function SimulationDrawer() {
       <div className="min-h-0 flex-1 overflow-y-auto">
         {/* Provenance: impossible to mistake for a live claim. */}
         <div className="flex flex-col gap-2 border-b border-hairline px-3 py-3">
-          <DemoBadge />
+          <DataSourceBadge />
           <p className="text-[11px] leading-snug text-ink-dim">
             Every value on this screen is generated in your browser. No vehicle, no satellite and
             no sensor is involved.
@@ -137,7 +137,7 @@ export function SimulationDrawer() {
               onClick={() => cmd.setRunning(false)}
               disabled={!paused}
             >
-              <span aria-hidden>❙❙</span> Hold
+              <span aria-hidden>â™â™</span> Hold
             </button>
             <button
               type="button"
@@ -160,7 +160,7 @@ export function SimulationDrawer() {
           <div className="mt-3">
             <div className="flex items-baseline justify-between">
               <span className="label-micro">Playback speed</span>
-              <span className="readout text-[11px] text-ink-muted">{playbackSpeed}×</span>
+              <span className="readout text-[11px] text-ink-muted">{playbackSpeed}Ã—</span>
             </div>
             <input
               type="range"
@@ -173,9 +173,9 @@ export function SimulationDrawer() {
               aria-label="Playback speed multiplier"
             />
             <div className="readout mt-0.5 flex justify-between text-[9px] text-ink-faint">
-              <span>0.25×</span>
-              <span>1×</span>
-              <span>3×</span>
+              <span>0.25Ã—</span>
+              <span>1Ã—</span>
+              <span>3Ã—</span>
             </div>
           </div>
 
@@ -201,8 +201,8 @@ export function SimulationDrawer() {
                 <span className="label-micro">Feed AI output to filter</span>
                 <span className="mt-0.5 block text-[10px] leading-snug text-ink-dim">
                   {aiContribution
-                    ? 'The model’s bias estimate is applied as a weighted measurement.'
-                    : 'Displayed but ignored. Trigger an outage to watch the ellipse grow unchecked — the clearest way to see what the model is actually worth.'}
+                    ? 'The modelâ€™s bias estimate is applied as a weighted measurement.'
+                    : 'Displayed but ignored. Trigger an outage to watch the ellipse grow unchecked â€” the clearest way to see what the model is actually worth.'}
                 </span>
               </span>
             </button>
@@ -238,8 +238,8 @@ export function SimulationDrawer() {
           </button>
 
           <p className="mt-2 text-[10px] leading-snug text-ink-dim">
-            Outage runs the full ladder — degraded, outage detected, dead reckoning, AI correction,
-            re-fusion, stabilized — and writes each step to the timeline.
+            Outage runs the full ladder â€” degraded, outage detected, dead reckoning, AI correction,
+            re-fusion, stabilized â€” and writes each step to the timeline.
           </p>
         </section>
 
@@ -248,8 +248,8 @@ export function SimulationDrawer() {
           <span className="label-micro">Scenario parameters</span>
           <dl className="mt-1.5 space-y-[3px]">
             <Stat label="Target speed" value={`${(active.targetSpeed * 3.6).toFixed(0)} km/h`} />
-            <Stat label="IMU noise" value={`${active.imuNoise.toFixed(3)} m/s²`} />
-            <Stat label="Nominal 1σ" value={`${active.nominalSigma.toFixed(1)} m`} />
+            <Stat label="IMU noise" value={`${active.imuNoise.toFixed(3)} m/sÂ²`} />
+            <Stat label="Nominal 1Ïƒ" value={`${active.nominalSigma.toFixed(1)} m`} />
             <Stat
               label="Drift rate"
               value={`${active.driftSigmaPerSec.toFixed(3)} m/s`}
@@ -268,8 +268,8 @@ export function SimulationDrawer() {
           <Satellite size={11} className="text-ink-dim" />
           <span className="readout truncate text-[9px] text-ink-dim">
             {frame?.gnss.available
-              ? `GNSS locked · ${frame.gnss.satellitesUsed} sats`
-              : `GNSS denied · ${(frame?.gnss.secondsSinceFix ?? 0).toFixed(0)}s`}
+              ? `GNSS locked Â· ${frame.gnss.satellitesUsed} sats`
+              : `GNSS denied Â· ${(frame?.gnss.secondsSinceFix ?? 0).toFixed(0)}s`}
           </span>
         </div>
       </footer>

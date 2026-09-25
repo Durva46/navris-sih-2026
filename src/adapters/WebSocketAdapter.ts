@@ -22,7 +22,12 @@ import type { DataSourceLabel, NavigationFrame } from '@/types/navigation';
  */
 export class WebSocketAdapter extends BaseAdapter {
   readonly id = 'websocket' as const;
+  /**
+   * Remains DEMO_SIMULATED while this is a stub. See ApiAdapter: provenance
+   * flips to MEASURED only when real frames are genuinely received.
+   */
   readonly source: DataSourceLabel = 'DEMO_SIMULATED';
+  readonly mode = 'live' as const;
 
   private endpoint = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/nav`;
   private socket: WebSocket | null = null;

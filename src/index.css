@@ -132,13 +132,47 @@
 }
 
 @layer utilities {
-  .grid-instrument {
-    background-image:
-      linear-gradient(to right, rgba(27, 37, 55, 0.55) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(27, 37, 55, 0.55) 1px, transparent 1px);
-  }
-
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/**
+ * MapLibre surface, restyled to match the console.
+ *
+ * MapLibre ships a light-theme control set. Left alone, its attribution control
+ * would be a bright chip in the middle of a dark instrument panel. These
+ * overrides only touch colour and shape — no control is hidden, and in
+ * particular the attribution control stays visible, because the OSM credit is a
+ * licence requirement and not a matter of taste.
+ */
+@layer components {
+  .maplibregl-ctrl-attrib.maplibregl-compact {
+    @apply rounded-none border border-hairline-strong bg-base-900/90 font-mono text-[10px];
+  }
+
+  .maplibregl-ctrl-attrib-inner a {
+    @apply text-ink-dim no-underline;
+  }
+
+  .maplibregl-ctrl-attrib-inner a:hover {
+    @apply text-ink;
+  }
+
+  .maplibregl-ctrl-attrib-button {
+    @apply bg-base-700;
+  }
+
+  /* The scale bar we draw ourselves is the readable one; hide MapLibre's
+     duplicate so the map carries a single, consistent measurement. */
+  .maplibregl-ctrl-scale {
+    display: none;
+  }
+
+  /* Keep the canvas focusable for keyboard users, but without a browser default
+     ring that would cut across the viewport. */
+  .maplibregl-canvas:focus-visible {
+    outline: 1px solid theme('colors.nominal.DEFAULT');
+    outline-offset: -1px;
   }
 }
