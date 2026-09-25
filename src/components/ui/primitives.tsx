@@ -1,0 +1,189 @@
+import type { ReactNode } from 'react';
+
+/**
+ * Base primitives. Deliberately small and unopinionated — the instrument look
+ * comes from hairlines, monospace numerals and the state colour table, not from
+ * a component library.
+ */
+
+export function Panel({
+  title,
+  aside,
+  children,
+  className = '',
+  bodyClassName = '',
+  accent,
+}: {
+  title: string;
+  aside?: ReactNode;
+  children: ReactNode;
+  className?: string;
+  bodyClassName?: string;
+  /** Optional left-edge accent, e.g. the system state colour. */
+  accent?: string;
+}) {
+  return (
+    <section className={`panel flex min-h-0 flex-col ${className}`}>
+      <header className="panel-header shrink-0">
+        {accent && (
+          <span
+            aria-hidden
+            className="h-3 w-[2px] shrink-0"
+            style={{ background: accent }}
+          />
+        )}
+        <h2 className="panel-title">{title}</h2>
+        {aside && <div className="ml-auto flex items-center gap-2">{aside}</div>}
+      </header>
+      <div className={`min-h-0 flex-1 ${bodyClassName}`}>{children}</div>
+    </section>
+  );
+}
+
+export function PanelRow({
+  label,
+  value,
+  mono = true,
+  valueColor,
+  hint,
+}: {
+  label: string;
+  value: ReactNode;
+  mono?: boolean;
+  valueColor?: string;
+  hint?: string;
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 py-[3px]">
+      <span className="label-micro shrink-0" title={hint}>
+        {label}
+      </span>
+      <span
+        className={`readout text-[11px] leading-tight ${mono ? '' : 'font-sans'}`}
+        style={valueColor ? { color: valueColor } : undefined}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+/** A key/value block used across the System panel. */
+export function ReadoutGrid({ children }: { children: ReactNode }) {
+  return <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">{children}</dl>;
+}
+
+export function ReadoutTerm({ children, title }: { children: ReactNode; title?: string }) {
+  return (
+    <dt className="label-micro self-baseline" title={title}>
+      {children}
+    </dt>
+  );
+}
+
+export function ReadoutDef({
+  children,
+  color,
+  className = '',
+  title,
+}: {
+  children: ReactNode;
+  color?: string;
+  className?: string;
+  title?: string;
+}) {
+  return (
+    <dd
+      className={`readout text-right text-[11px] ${className}`}
+      style={color ? { color } : undefined}
+      title={title}
+    >
+      {children}
+    </dd>
+  );
+}
+
+/** A labelled horizontal meter. Used for confidence, correction magnitude, etc. */
+export function Meter({
+  label,
+  value,
+  max = 1,
+  color,
+  suffix,
+  formatValue,
+}: {
+  label: string;
+  value: number;
+  max?: number;
+  color: string;
+  suffix?: string;
+  formatValue?: (v: number) => string;
+}) {
+  const pct = Math.max(0, Math.min(1, value / max)) * 100;
+  return (
+    <div className="py-1">
+      <div className="flex items-baseline justify-between">
+        <span className="label-micro">{label}</span>
+        <span className="readout text-[11px]" style={{ color }}>
+          {formatValue ? formatValue(value) : value.toFixed(2)}
+          {suffix}
+        </span>
+      </div>
+      <div className="mt-1 h-[3px] w-full bg-hairline">
+        <div
+          className="h-full transition-[width] duration-200 ease-instrument"
+          style={{ width: `${pct}%`, background: color }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Small status glyph row. Icon is optional; never decorative-only. */
+export function StatusDot({ color, pulse = false, size = 7 }: { color: string; pulse?: boolean; size?: number }) {
+  return (
+    <span className="relative inline-flex shrink-0" style={{ width: size, height: size }}>
+      {pulse && (
+        <span
+          aria-hidden
+          className="absolute inset-0 animate-pulse-ring rounded-full"
+          style={{ background: color }}
+        />
+      )}
+      <span
+        className="m-auto rounded-full"
+        style={{ width: size, height: size, background: color, boxShadow: `0 0 6px ${color}66` }}
+      />
+    </span>
+  );
+}
+
+/**
+ * The permanent provenance label. Nothing in this UI may be mistaken for
+ * measured hardware data while running on the mock, so this is not a badge you
+ * can turn off — it is chrome.
+ */
+export function DemoBadge({ compact = false }: { compact?: boolean }) {
+  return (
+    <span
+      className="readout inline-flex items-center gap-1.5 border border-degraded/40 bg-degraded/[0.07] px-2 py-1
+                 text-micro font-medium uppercase tracking-[0.14em] text-degraded-soft"
+      title="All values on this screen are produced by a client-side simulation. They are not measurements from real hardware."
+    >
+      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-degraded" />
+      {compact ? 'SIM' : 'SIMULATION / DEMO MODE'}
+    </span>
+  );
+}
+
+/** Section divider with an optional label — used inside dense panels. */
+export function Divider({ label }: { label?: string }) {
+  if (!label) return <div className="my-2 h-px bg-hairline" />;
+  return (
+    <div className="my-2 flex items-center gap-2">
+      <div className="h-px flex-1 bg-hairline" />
+      <span className="label-micro">{label}</span>
+      <div className="h-px flex-1 bg-hairline" />
+    </div>
+  );
+}
