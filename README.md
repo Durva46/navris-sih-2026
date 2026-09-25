@@ -2,11 +2,22 @@
 
 NAVRIS — Intelligent Navigation & Inertial System. React + TypeScript front end for SIH 2026 (ISRO 26168).
 
+> **Architecture & roadmap:** [`NAVRIS_FRONTEND_STRATEGY.md`](./NAVRIS_FRONTEND_STRATEGY.md) is the
+> implementation source of truth — the adapter family, `dataSourceMode`, the map layering, and
+> the scientific boundary between navigation and visualisation. This README describes only what
+> is built and working today.
+
 **Everything this app shows is simulated.** There is no real sensor, no real GNSS
 receiver, and no trained model behind the numbers. Every frame and every event is
 stamped `DEMO_SIMULATED`, and the UI labels it as such in the top bar. The
 simulation is deterministic (seeded, no `Math.random()`), so a judge who resets the
 demo sees the exact same run twice.
+
+**The map is currently a placeholder, not a real geographic map.** It is a hand-painted
+Canvas2D grid with no tiles, no basemap, and no coordinate reference beyond the local ENU
+frame. The strategy specifies a real MapLibre + OSM-derived basemap and marks replacing
+this as required work. Nothing in the navigation logic depends on the current map, which is
+precisely why it can be swapped without touching the engine.
 
 ## The demo, in one sentence
 
@@ -116,6 +127,16 @@ scripts/
 `NavigationProvider` talks to the adapter and writes to the store. No component
 imports an adapter, and no component imports the simulation. That is what makes
 the next step a config change instead of a refactor.
+
+### Adapter family
+
+`MockAdapter` (simulated), `ApiAdapter`, and `WebSocketAdapter` are implemented.
+`DeviceAdapter` (phone GNSS + IMU) and `ReplayAdapter` (recorded datasets for
+research) are documented seams in the strategy and **do not exist yet** — they are
+not required for this milestone. The strategy also specifies a first-class
+`dataSourceMode` (`demo` | `live` | `research`) so the UI branches on the nature
+of the data rather than on adapter identity; today the UI reads the per-value
+`DataSourceLabel` instead.
 
 ## Swapping in real data
 
