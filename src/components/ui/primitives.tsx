@@ -178,12 +178,25 @@ export function DataSourceBadge({ compact = false }: { compact?: boolean }) {
   const spec = DATA_SOURCE_BADGE[dataSourceMode];
   return (
     <span
-      className={`readout inline-flex items-center gap-1.5 border px-2 py-1
+      className={`readout inline-flex shrink-0 items-center gap-1.5 border px-2 py-1
                   text-micro font-medium uppercase tracking-[0.14em] ${spec.className}`}
       title={DATA_SOURCE_MODE_DETAIL[dataSourceMode]}
     >
       <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${spec.dot}`} />
-      {compact ? spec.short : spec.long}
+      {/*
+        The full label ("Simulation / Demo Mode") is roughly 200px of unbreakable
+        mono at this tracking, which is more than a 320px header can spare. The
+        abbreviation is the same fact, and `title` still carries the full
+        sentence on hover, so nothing is actually lost.
+      */}
+      {compact ? (
+        spec.short
+      ) : (
+        <>
+          <span className="lg:hidden">{spec.short}</span>
+          <span className="hidden lg:inline">{spec.long}</span>
+        </>
+      )}
     </span>
   );
 }

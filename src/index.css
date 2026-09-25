@@ -35,7 +35,38 @@
       radial-gradient(100% 100% at 50% 100%, rgba(0, 0, 0, 0.55) 0%, transparent 60%);
     background-attachment: fixed;
     transition: background-image 600ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    /* A cockpit is a fixed viewport: every panel is already positioned, and
+       letting the page itself scroll would let the whole instrument drift
+       out of frame. On narrow screens the layout stacks instead, so the
+       override below hands scrolling back to the document. */
     overflow: hidden;
+  }
+
+  /**
+   * Below the `lg` structural breakpoint the cockpit stacks vertically and
+   * stops fitting in a viewport, so it has to become a normal scrolling page.
+   *
+   * Without this the stacked side rail and the simulation drawer render at full
+   * height inside a non-scrolling, overflow-hidden shell, which means they are
+   * *clipped* rather than scrollable — unreachable content, not merely cramped
+   * content. `overflow-x: hidden` guards against horizontal scroll from any
+   * fixed-width child that we have not yet caught.
+   */
+  @media (max-width: 1023px) {
+    html,
+    body,
+    #root {
+      height: auto;
+      min-height: 100%;
+    }
+
+    body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      /* Fixed-attachment gradients cost a repaint on every scroll step on
+         mobile, where the compositor is the scarcer resource. */
+      background-attachment: scroll;
+    }
   }
 
   ::selection {
@@ -101,7 +132,7 @@
   }
 
   .btn {
-    @apply inline-flex select-none items-center justify-center gap-1.5 border border-hairline-strong
+    @apply inline-flex min-h-8 select-none items-center justify-center gap-1.5 border border-hairline-strong
            bg-surface-raised px-3 py-1.5 font-mono text-micro uppercase tracking-[0.1em]
            text-ink-muted transition-colors duration-150 ease-instrument
            hover:bg-surface-hover hover:text-ink disabled:cursor-not-allowed disabled:opacity-35

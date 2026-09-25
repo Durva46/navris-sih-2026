@@ -1,11 +1,23 @@
 import {
   AttributionControl,
   Map as MapLibreMap,
+  setWorkerUrl,
   type GeoJSONSource,
   type LngLatLike,
   type LayerSpecification,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+// MapLibre resolves its own worker at runtime, as a *sibling of its module URL*
+// (`new URL('./maplibre-gl-worker.mjs', import.meta.url)`). That is invisible
+// to a bundler's static analysis, so after Vite inlines maplibre-gl into this
+// chunk the computed URL points at an asset that was never emitted — the worker
+// 404s and the map falls back off the main thread. Importing it through
+// `?worker&url` makes the bundler emit the file and hand back its real hashed
+// name, which is then set explicitly. Without this the map still draws, but it
+// logs a worker error and does its tile work on the main thread.
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+
+if (maplibreWorkerUrl) setWorkerUrl(maplibreWorkerUrl);
 import { easeCamera, fitSpan, nearestSpan, type Camera } from '@/components/map/camera';
 import { DEMO_ORIGIN, enuToPosition } from '@/lib/geo';
 import {
@@ -42,7 +54,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  *    `map/overlays.ts`, reads the basemap back to influence navigation. There is
  *    no map matching, no road snapping, and no code path where a rendered
  *    feature could alter a position. The data flow is strictly
- *    engine â†’ NavigationState â†’ map.
+ *    engine → NavigationState → map.
  *
  * 2. **Tile availability is not GNSS availability.** They are tracked
  *    independently (see `mapStatus`). A tile failure degrades the basemap and
@@ -412,7 +424,7 @@ export function MapLibreView() {
       }
 
       // GNSS position: a live dot, or a held fix joined to the solution by the
-      // divergence it has accumulated. The fix never moves during an outage â€”
+      // divergence it has accumulated. The fix never moves during an outage —
       // that frozen mark is the point.
       const heldEnu = lastGnssEnu(f);
       const lastFix = store.gnssPath[store.gnssPath.length - 1];
@@ -578,7 +590,7 @@ function MapOverlays({
           role="status"
           className="pointer-events-none absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded border border-degraded/40 bg-base-900/90 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-degraded-soft"
         >
-          Map tiles unavailable â€” navigation unaffected
+          Map tiles unavailable — navigation unaffected
         </div>
       )}
 
@@ -599,7 +611,7 @@ function MapOverlays({
         >
           <span className="readout text-[9px] uppercase tracking-[0.12em] text-ink-dim">GNSS fix held</span>
           <span className="readout text-[11px] text-ink-muted">{divergence.toFixed(1)} m</span>
-          <span className="readout text-[9px] text-ink-faint">age {frame.gnss.secondsSinceFix.toFixed(1)} s</span>
+          <span className="readout text-[9px] text-ink-dim">age {frame.gnss.secondsSinceFix.toFixed(1)} s</span>
         </div>
       )}
 
@@ -620,7 +632,7 @@ function ScaleBar({ metres }: { metres: number }) {
   );
 }
 
-/** Snap a length to 1/2/5 Ã— a power of ten, so the bar reads cleanly. */
+/** Snap a length to 1/2/5 — a power of ten, so the bar reads cleanly. */
 function niceRound(m: number): number {
   const pow = Math.pow(10, Math.floor(Math.log10(Math.max(1, m))));
   const n = m / pow;

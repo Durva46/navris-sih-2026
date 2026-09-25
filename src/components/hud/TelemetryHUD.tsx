@@ -25,7 +25,7 @@ export function TelemetryHUD() {
 
   if (!frame) {
     return (
-      <div className="pointer-events-none absolute bottom-3 left-3 border border-hairline bg-surface/90 px-3 py-2 backdrop-blur-[2px]">
+      <div className="pointer-events-none absolute bottom-2 left-2 sm:bottom-3 sm:left-3 border border-hairline bg-surface/90 px-3 py-2 backdrop-blur-[2px]">
         <span className="label-micro">AWAITING FIRST FIX</span>
       </div>
     );
@@ -35,7 +35,7 @@ export function TelemetryHUD() {
 
   return (
     <div
-      className="pointer-events-none absolute bottom-3 left-3 flex flex-col gap-2 border border-hairline bg-surface/92 px-3 py-2.5 backdrop-blur-[2px]"
+      className="pointer-events-none absolute bottom-2 left-2 sm:bottom-3 sm:left-3 flex flex-col gap-2 border border-hairline bg-surface/92 px-3 py-2.5 backdrop-blur-[2px]"
       style={{ borderLeftColor: visual.border, borderLeftWidth: 2 }}
     >
       <div className="flex items-center gap-2">
@@ -48,7 +48,7 @@ export function TelemetryHUD() {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-5 gap-y-1">
+      <div className="grid grid-cols-2 gap-x-3 gap-y-1 sm:gap-x-5">
         <Field label="LAT" value={formatLat(p.lat)} />
         <Field label="LON" value={formatLon(p.lon)} />
         <Field label="ALT" value={formatAlt(p.alt)} />
@@ -57,7 +57,7 @@ export function TelemetryHUD() {
 
       <div className="h-px w-full bg-hairline" />
 
-      <div className="grid grid-cols-3 gap-x-4 gap-y-1">
+      <div className="grid grid-cols-3 gap-x-3 gap-y-1 sm:gap-x-4">
         <Field label="SPD" value={formatSpeed(frame.navris.speed)} emphasis />
         <Field label="M/S" value={formatSpeedMs(frame.navris.speed)} />
         <Field label="HDG" value={formatHeading(frame.navris.heading.deg)} emphasis />
@@ -90,7 +90,7 @@ function Field({
     <div className="flex flex-col">
       <span className="label-micro leading-none">{label}</span>
       <span
-        className="readout mt-[3px] text-[12px] leading-none text-ink"
+        className="readout mt-[3px] text-[11px] leading-none text-ink sm:text-[12px]"
         style={emphasis ? { color: '#5EEAD4' } : undefined}
       >
         {value}

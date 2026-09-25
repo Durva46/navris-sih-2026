@@ -1,6 +1,7 @@
 import { SimulationDrawer } from '@/components/sim/SimulationDrawer';
 import { NavigationMap } from '@/components/map/NavigationMap';
 import { TelemetryHUD } from '@/components/hud/TelemetryHUD';
+import { IntroSection } from '@/components/intro/IntroSection';
 import { AIPipelineIndicator, EventTimeline, SensorSnapshot } from '@/components/panels/HealthPanels';
 import { ConfidenceSparkline } from '@/components/panels/ConfidenceSparkline';
 import { Panel } from '@/components/ui/primitives';
@@ -15,6 +16,7 @@ import { useMemo } from 'react';
  * Live Navigation — the default landing view and the demo screen.
  *
  * The layout contract:
+ *   • a short, collapsible introduction sits above everything
  *   • the map owns the majority of the width and never scrolls
  *   • the right rail is glanceable health, not sensor detail
  *   • the timeline runs along the bottom and is the narrative artefact
@@ -34,15 +36,20 @@ export function LiveNavigation() {
   const mode = useMemo(() => modeFor(frame?.state.id ?? 'INITIALISING'), [frame?.state.id]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <IntroSection />
+
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
       {/* ---------------- Map column ---------------- */}
-      <div className="flex min-h-[44vh] min-w-0 flex-1 flex-col lg:min-h-0">
+      <div className="flex min-h-[52vh] min-w-0 flex-1 flex-col lg:min-h-0">
         <div className="relative min-h-0 flex-1">
           <NavigationMap />
           <TelemetryHUD />
 
-          {/* Mode strip: the current mode, named in words as well as colour. */}
-          <div className="pointer-events-none absolute left-0 right-0 top-0 flex items-center gap-2 px-3 py-2">
+          {/* Mode strip: the current mode, named in words as well as colour.
+              Wraps rather than clips — at 320px these three chips are ~366px
+              wide, and all three say something a viewer should be able to read. */}
+          <div className="pointer-events-none absolute left-0 right-0 top-0 flex flex-wrap items-center gap-1.5 px-2 py-2 sm:gap-2 sm:px-3">
             <span
               className="readout border px-2 py-[3px] text-[9px] uppercase tracking-[0.14em]"
               style={{ color: visual.text, borderColor: visual.border, background: visual.wash }}
@@ -64,9 +71,13 @@ export function LiveNavigation() {
         </div>
       </div>
 
-      {/* ---------------- Right rail ---------------- */}
+      {/* ---------------- Right rail ----------------
+          `lg:overflow-y-auto` is what makes the rail scroll. Below `lg` the
+          layout is a document, so the rail is sized by its content and the page
+          scrolls instead — without that split, a `shrink-0` rail inside a
+          non-scrolling shell is simply clipped off the bottom of the screen. */}
       <div className="flex w-full shrink-0 flex-col border-t border-hairline lg:w-[336px] lg:border-l lg:border-t-0">
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col lg:overflow-y-auto">
           <SensorSnapshot onExpand={() => cmd.setSystemPanelOpen(true)} />
           <AIPipelineIndicator />
 
@@ -88,6 +99,7 @@ export function LiveNavigation() {
         </div>
 
         {simulationOpen && <SimulationDrawer />}
+      </div>
       </div>
     </div>
   );

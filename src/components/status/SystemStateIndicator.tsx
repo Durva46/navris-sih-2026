@@ -25,13 +25,13 @@ export function SystemStateIndicator({ compact = false }: { compact?: boolean })
 
   return (
     <div
-      className="flex min-w-0 items-center gap-3"
+      className="flex min-w-0 items-center gap-2.5 sm:gap-3"
       role="status"
       aria-live="polite"
       aria-atomic="true"
     >
       <div
-        className="relative flex h-9 w-9 shrink-0 items-center justify-center"
+        className="relative flex h-7 w-7 shrink-0 items-center justify-center sm:h-9 sm:w-9"
         style={{ color: visual.accent }}
       >
         {visual.pulse && (
@@ -49,23 +49,37 @@ export function SystemStateIndicator({ compact = false }: { compact?: boolean })
         <StatusDot color={visual.accent} pulse={false} size={9} />
       </div>
 
-      <div className="min-w-0">
-        <div className="flex items-baseline gap-2">
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           <span
             className={cn(
-              'font-mono font-bold uppercase leading-none tracking-[0.06em] tabular-nums',
-              compact ? 'text-state-lg' : 'text-state-xl',
+              'font-mono font-bold uppercase leading-none tracking-[0.04em] tabular-nums',
+              // JetBrains Mono advances 0.6em per glyph, so the longest label
+              // ("INS · DEAD RECKONING", 20 characters) needs roughly
+              // 20 x 0.64em of width. At 44px that is ~560px, which overflows
+              // every phone. These four steps keep the heading the loudest
+              // element in the header at every width without letting it clip:
+              //   320px  19px -> ~243px of 296px available
+              //   380px  22px -> ~282px of 356px available
+              //   640px  28px -> ~358px of 608px available
+              //  1024px  36px -> ~460px of ~944px available
+              compact ? 'text-state-lg' : 'text-[19px] xs:text-[22px] sm:text-state-lg lg:text-state-xl',
             )}
             style={{ color: visual.text }}
           >
             {descriptor.label}
           </span>
           {dwell > 0.4 && (
-            <span className="readout text-[11px] text-ink-dim">{formatDuration(dwell)}</span>
+            <span className="readout shrink-0 text-[11px] text-ink-dim">{formatDuration(dwell)}</span>
           )}
         </div>
         {!compact && (
-          <p className="mt-1 max-w-[62ch] truncate text-[12px] leading-snug text-ink-muted">
+          // The explanation is what makes the state legible without relying on
+          // colour, so it is never truncated: `lg:max-w-[62ch] lg:truncate`
+          // looked tidy but silently dropped the tail of the sentence on a
+          // 1366px laptop. Two lines at every width, with a generous cap so it
+          // does not stretch across a 1920px header.
+          <p className="mt-1 line-clamp-2 max-w-[72ch] text-[11px] leading-snug text-ink-muted sm:text-[12px]">
             {descriptor.detail}
           </p>
         )}

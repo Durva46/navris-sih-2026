@@ -31,9 +31,14 @@ function Shell() {
   const cmd = useNavigationCommands();
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    // `h-full` on desktop pins the cockpit to the viewport. `min-h-full` below
+    // `lg` lets the stacked layout grow past it and scroll the document, which
+    // is the only way the side rail and drawer stay reachable on a phone.
+    <div className="flex min-h-full flex-col lg:h-full lg:min-h-0">
       <TopBar />
-      <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      {/* Clipping is correct on desktop and harmful on mobile, so it is scoped
+          to the breakpoint where the layout actually fits. */}
+      <main className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
         <Suspense fallback={<AnalyticsFallback />}>
           <Routes>
             <Route path="/" element={<LiveNavigation />} />

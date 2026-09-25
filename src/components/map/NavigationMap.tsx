@@ -163,26 +163,38 @@ function LegendRow({
  * provider swap cannot silently drop a licence-required credit. MapLibre's own
  * attribution control is also enabled, which renders the same string from the
  * tile source — deliberate redundancy on a legal requirement.
+ *
+ * The bar itself is `pointer-events-none` so it never steals a map drag from the
+ * corner it sits in, which means the links have to opt back in individually.
+ * Without `pointer-events-auto` they render as a credit but are not clickable,
+ * and a credit that cannot be followed does not satisfy the terms it exists to
+ * satisfy.
  */
 function Attribution({ provider }: { provider: ReturnType<typeof getMapProvider> }) {
+  const link =
+    'pointer-events-auto font-mono text-[10px] underline underline-offset-2';
+
   return (
-    <div className="pointer-events-none absolute bottom-1.5 left-3 z-10 flex items-center gap-2">
+    <div
+      data-map-attribution
+      className="pointer-events-none absolute bottom-1.5 left-3 z-10 flex items-center gap-2"
+    >
       <a
         href={provider.attributionUrl}
         target="_blank"
         rel="noreferrer noopener"
-        className="font-mono text-[9px] text-ink-dim underline decoration-ink-dim/40 underline-offset-2 hover:text-ink-muted"
+        className={`${link} text-ink-dim decoration-ink-dim/40 hover:text-ink-muted`}
       >
         {provider.attribution}
       </a>
-      <span className="text-ink-faint" aria-hidden>
+      <span className="text-ink-dim" aria-hidden>
         ·
       </span>
       <a
         href={provider.termsUrl}
         target="_blank"
         rel="noreferrer noopener"
-        className="font-mono text-[9px] text-ink-faint underline decoration-ink-faint/30 underline-offset-2 hover:text-ink-dim"
+        className={`${link} text-ink-dim decoration-ink-dim/30 hover:text-ink-dim`}
       >
         tile usage
       </a>

@@ -117,7 +117,12 @@ function Row({
           </span>
           {pulse && <StatusDot color={color} size={5} />}
         </div>
-        <p className="readout mt-[3px] truncate text-[10px] text-ink-dim">{sub}</p>
+        {/* Two lines rather than a hard truncate: at 320px a single truncated
+            line was cutting the tail off the explanation, and this text is the
+            only thing that says what actually happened. */}
+        <p className="readout mt-[3px] line-clamp-2 break-words text-[10px] leading-snug text-ink-dim">
+          {sub}
+        </p>
       </div>
     </div>
   );
@@ -285,8 +290,8 @@ function EventRow({ event }: { event: NavigationEvent }) {
           >
             {event.title}
           </span>
-          <span className="readout text-[9px] text-ink-faint">{formatClock(event.timestamp)}</span>
-          <span className="readout text-[9px] uppercase tracking-[0.1em] text-ink-faint">
+          <span className="readout text-[9px] text-ink-dim">{formatClock(event.timestamp)}</span>
+          <span className="readout text-[9px] uppercase tracking-[0.1em] text-ink-dim">
             {event.kind}
           </span>
         </div>

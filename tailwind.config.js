@@ -3,6 +3,10 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      // `xs` covers the narrowest phones in scope (320px). It exists because the
+      // mono state heading needs a step between "no suffix" and `sm`, and
+      // because a 20-character state label does not fit at the default 16px.
+      screens: { xs: '380px' },
       colors: {
         // ---- Base surface: near-black navy, NOT pure black. Aerospace console convention. ----
         base: {
@@ -25,11 +29,24 @@ export default {
         },
 
         // ---- Telemetry / readouts ----
+        // Three steps, every one of which clears WCAG AA (4.5:1) for body text on
+        // all four console surfaces. Ratios below are measured, worst case
+        // against the lightest surface (`surface-hover`), not against `surface`:
+        //
+        //   ink        #E6ECF5   14.6:1   AAA
+        //   ink-muted  #8C9AB2    6.1:1   AA
+        //   ink-dim    #788499    4.6:1   AA
+        //
+        // There was a fourth step, `ink-faint`, at 3.3:1 — and it was carrying
+        // real information at 9px and 10px (event timestamps, pipeline stage
+        // labels, the scale bar). Four AA steps that are also visually distinct
+        // do not exist in this hue: solving for them requires darkening `ink`
+        // itself, which costs more than the extra step is worth. So the ramp is
+        // three steps and `ink-faint` is gone rather than left as a trap.
         ink: {
           DEFAULT: '#E6ECF5',
           muted: '#8C9AB2',
-          dim: '#5A6781',
-          faint: '#3A4557',
+          dim: '#788499',
         },
 
         // ---- State colour language. Used identically in badges, map tint,
@@ -70,9 +87,12 @@ export default {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       fontSize: {
-        // The state indicator must be legible from across a room.
-        'state-xl': ['2.75rem', { lineHeight: '1.05', letterSpacing: '-0.02em' }],
-        'state-lg': ['2rem', { lineHeight: '1.1', letterSpacing: '-0.01em' }],
+        // The state heading must be readable from across a room without
+        // crowding the header. 2.75rem pushed the desktop header to the point
+        // where the heading and the badges competed for the same row; 2.25rem
+        // keeps it the loudest element while leaving the header room to breathe.
+        'state-xl': ['2.25rem', { lineHeight: '1.08', letterSpacing: '-0.01em' }],
+        'state-lg': ['1.75rem', { lineHeight: '1.12', letterSpacing: '-0.005em' }],
         micro: ['0.6875rem', { lineHeight: '1', letterSpacing: '0.08em' }],
       },
       borderRadius: {

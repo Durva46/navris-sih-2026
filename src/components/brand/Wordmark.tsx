@@ -87,11 +87,15 @@ export function Wordmark({
   className?: string;
 }) {
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
+    <div className={`flex items-center gap-2 ${className}`}>
       <Logomark size={26} color="#8C9AB2" accent={accent} animate={animate} />
       <div className="flex flex-col leading-none">
-        <span className="text-[15px] font-semibold tracking-[0.22em] text-ink">NAVRIS</span>
-        <span className="mt-[3px] font-mono text-[8px] uppercase tracking-[0.18em] text-ink-dim">
+        <span className="text-[14px] font-semibold tracking-[0.2em] text-ink sm:text-[15px] sm:tracking-[0.22em]">
+          NAVRIS
+        </span>
+        {/* The expansion is a nicety, not information: on a phone the header
+            row is already tight, and this line is the widest element in it. */}
+        <span className="mt-[3px] hidden font-mono text-[8px] uppercase tracking-[0.18em] text-ink-dim sm:block">
           Navigation &amp; Inertial System
         </span>
       </div>

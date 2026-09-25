@@ -6,3 +6,7 @@ dist-ssr
 .vite
 *.log
 *.tsbuildinfo
+
+# Screenshots produced by the responsive QA harness (qa-responsive.mjs).
+# Regenerated on demand, and they are build artefacts, not source.
+qa-shots/

@@ -13,10 +13,21 @@ import { NavLink } from 'react-router-dom';
 /**
  * The persistent top bar.
  *
- * Layout priority, left to right, is deliberate: wordmark â†’ the system state
- * (the largest thing on screen) â†’ data provenance â†’ view navigation. A judge
- * standing at the back of the room reads only the middle group, and it has to
- * be legible without effort.
+ * Layout priority, left to right, is deliberate: wordmark -> the system state
+ * (the loudest thing on screen) -> data provenance -> view navigation. A judge
+ * standing at the back of the room reads only the state, and it has to be
+ * legible without effort.
+ *
+ * Responsiveness, and why it is structural rather than cosmetic: as a single
+ * non-wrapping row this bar needs roughly 700px of intrinsic width, which no
+ * phone has. So below `lg` it becomes a two-row layout — identity, controls and
+ * navigation on the first row; the state heading on a full-width second row.
+ *
+ * That is a reflow, not a shrink. Nothing is dropped: the provenance badge, both
+ * view links and both control buttons remain present at 320px, they simply move
+ * to a row that can hold them. `order-last` plus `w-full` is what promotes the
+ * state onto its own line, and `lg:contents` dissolves the arrangement back
+ * into the single desktop row without duplicating any markup.
  */
 export function TopBar() {
   const { simulationOpen, systemPanelOpen, manualOverride } = useNavigationUi();
@@ -39,21 +50,26 @@ export function TopBar() {
 
   return (
     <header
-      className="relative z-30 flex shrink-0 items-center gap-4 border-b border-hairline bg-surface px-4 py-2.5"
+      className="relative z-30 flex shrink-0 flex-wrap items-center gap-x-2 gap-y-2 border-b border-hairline
+                 bg-surface px-3 py-2 sm:gap-x-3 sm:px-4 lg:flex-nowrap lg:gap-x-5 lg:py-2.5"
       style={{ boxShadow: `inset 0 -1px 0 ${visual.border}00` }}
     >
       {/* Wordmark */}
-      <Wordmark accent={visual.accent} animate={state === 'RE_FUSION' || state === 'STABILIZED'} />
+      <Wordmark
+        accent={visual.accent}
+        animate={state === 'RE_FUSION' || state === 'STABILIZED'}
+        className="shrink-0"
+      />
 
-      <div className="h-8 w-px bg-hairline" />
+      <div className="hidden h-8 w-px bg-hairline lg:block" />
 
-      {/* The headline: system state */}
-      <div className="min-w-0 flex-1">
+      {/* The headline: system state. Own row on mobile, inline from `lg` up. */}
+      <div className="order-last w-full min-w-0 lg:order-none lg:w-auto lg:flex-1">
         <SystemStateIndicator />
       </div>
 
       {/* Provenance + mode */}
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 lg:ml-0">
         {showAiBadge && (
           <span
             className="readout hidden items-center gap-1.5 border px-2 py-1 text-micro uppercase tracking-[0.12em] lg:inline-flex"
@@ -89,7 +105,8 @@ export function TopBar() {
         </button>
       </div>
 
-      {/* View switch */}
+      {/* View switch. `min-h-8` is not decoration: at `py-1` these links were
+          19px tall, which is the primary navigation on a phone. */}
       <nav
         className="flex shrink-0 items-center gap-0.5 border border-hairline p-0.5"
         aria-label="Primary views"
@@ -98,7 +115,7 @@ export function TopBar() {
           to="/"
           end
           className={({ isActive }) =>
-            `flex items-center gap-1.5 px-2.5 py-1 font-mono text-micro uppercase tracking-[0.1em] transition-colors duration-150 ${
+            `flex min-h-8 items-center gap-1.5 px-2.5 py-1 font-mono text-micro uppercase tracking-[0.1em] transition-colors duration-150 ${
               isActive ? 'bg-surface-hover text-ink' : 'text-ink-dim hover:text-ink-muted'
             }`
           }
@@ -108,7 +125,7 @@ export function TopBar() {
         <NavLink
           to="/analytics"
           className={({ isActive }) =>
-            `flex items-center gap-1.5 px-2.5 py-1 font-mono text-micro uppercase tracking-[0.1em] transition-colors duration-150 ${
+            `flex min-h-8 items-center gap-1.5 px-2.5 py-1 font-mono text-micro uppercase tracking-[0.1em] transition-colors duration-150 ${
               isActive ? 'bg-surface-hover text-ink' : 'text-ink-dim hover:text-ink-muted'
             }`
           }
@@ -122,7 +139,7 @@ export function TopBar() {
         <span className="label-micro leading-none">Scenario</span>
         <span className="readout mt-1 text-[11px] text-ink-muted">
           {scenario.name}
-          {manualOverride && <span className="ml-1.5 text-ai-soft">Â· manual</span>}
+          {manualOverride && <span className="ml-1.5 text-ai-soft">· manual</span>}
         </span>
       </div>
     </header>

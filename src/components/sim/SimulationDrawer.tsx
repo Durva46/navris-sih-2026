@@ -7,6 +7,7 @@ import { formatMissionTime } from '@/lib/format';
 import { activeAdapterLabel } from '@/adapters';
 import {
   Gauge,
+  Pause,
   Play,
   RotateCcw,
   Satellite,
@@ -22,7 +23,7 @@ import { useState } from 'react';
  * A drawer attached to Live Navigation, deliberately *not* a route: the map must
  * never leave the screen while an operator is driving the demo. The one rule
  * this panel enforces above all others is that a presenter always has manual
- * control â€” no transition in the product is reachable only by a timer.
+ * control — no transition in the product is reachable only by a timer.
  */
 export function SimulationDrawer() {
   const { simulationOpen, scenario, paused, manualOverride, playbackSpeed, aiContribution } =
@@ -48,7 +49,7 @@ export function SimulationDrawer() {
         <button
           type="button"
           onClick={() => cmd.setSimulationOpen(false)}
-          className="btn btn-ghost ml-auto !px-1.5 !py-1"
+          className="btn btn-ghost ml-auto w-8 !px-0"
           aria-label="Collapse simulation panel"
         >
           <X size={13} />
@@ -137,7 +138,7 @@ export function SimulationDrawer() {
               onClick={() => cmd.setRunning(false)}
               disabled={!paused}
             >
-              <span aria-hidden>â™â™</span> Hold
+              <Pause size={11} /> Hold
             </button>
             <button
               type="button"
@@ -160,7 +161,7 @@ export function SimulationDrawer() {
           <div className="mt-3">
             <div className="flex items-baseline justify-between">
               <span className="label-micro">Playback speed</span>
-              <span className="readout text-[11px] text-ink-muted">{playbackSpeed}Ã—</span>
+              <span className="readout text-[11px] text-ink-muted">{playbackSpeed}×</span>
             </div>
             <input
               type="range"
@@ -169,13 +170,16 @@ export function SimulationDrawer() {
               step={0.25}
               value={playbackSpeed}
               onChange={(e) => cmd.setPlaybackSpeed(Number(e.target.value))}
-              className="mt-1.5 w-full accent-[#2DD4BF]"
+              // A default range input is 16px tall, which is not a usable control
+              // under a thumb. `h-8` gives it a real hit area; the accent colour
+              // keeps it consistent with the rest of the transport.
+              className="mt-1.5 h-8 w-full cursor-pointer accent-[#2DD4BF]"
               aria-label="Playback speed multiplier"
             />
-            <div className="readout mt-0.5 flex justify-between text-[9px] text-ink-faint">
-              <span>0.25Ã—</span>
-              <span>1Ã—</span>
-              <span>3Ã—</span>
+            <div className="readout mt-0.5 flex justify-between text-[9px] text-ink-dim">
+              <span>0.25×</span>
+              <span>1×</span>
+              <span>3×</span>
             </div>
           </div>
 
@@ -201,8 +205,8 @@ export function SimulationDrawer() {
                 <span className="label-micro">Feed AI output to filter</span>
                 <span className="mt-0.5 block text-[10px] leading-snug text-ink-dim">
                   {aiContribution
-                    ? 'The modelâ€™s bias estimate is applied as a weighted measurement.'
-                    : 'Displayed but ignored. Trigger an outage to watch the ellipse grow unchecked â€” the clearest way to see what the model is actually worth.'}
+                    ? 'The model’s bias estimate is applied as a weighted measurement.'
+                    : 'Displayed but ignored. Trigger an outage to watch the ellipse grow unchecked — the clearest way to see what the model is actually worth.'}
                 </span>
               </span>
             </button>
@@ -238,8 +242,8 @@ export function SimulationDrawer() {
           </button>
 
           <p className="mt-2 text-[10px] leading-snug text-ink-dim">
-            Outage runs the full ladder â€” degraded, outage detected, dead reckoning, AI correction,
-            re-fusion, stabilized â€” and writes each step to the timeline.
+            Outage runs the full ladder — degraded, outage detected, dead reckoning, AI correction,
+            re-fusion, stabilized — and writes each step to the timeline.
           </p>
         </section>
 
@@ -248,8 +252,8 @@ export function SimulationDrawer() {
           <span className="label-micro">Scenario parameters</span>
           <dl className="mt-1.5 space-y-[3px]">
             <Stat label="Target speed" value={`${(active.targetSpeed * 3.6).toFixed(0)} km/h`} />
-            <Stat label="IMU noise" value={`${active.imuNoise.toFixed(3)} m/sÂ²`} />
-            <Stat label="Nominal 1Ïƒ" value={`${active.nominalSigma.toFixed(1)} m`} />
+            <Stat label="IMU noise" value={`${active.imuNoise.toFixed(3)} m/s²`} />
+            <Stat label="Nominal 1σ" value={`${active.nominalSigma.toFixed(1)} m`} />
             <Stat
               label="Drift rate"
               value={`${active.driftSigmaPerSec.toFixed(3)} m/s`}
@@ -268,8 +272,8 @@ export function SimulationDrawer() {
           <Satellite size={11} className="text-ink-dim" />
           <span className="readout truncate text-[9px] text-ink-dim">
             {frame?.gnss.available
-              ? `GNSS locked Â· ${frame.gnss.satellitesUsed} sats`
-              : `GNSS denied Â· ${(frame?.gnss.secondsSinceFix ?? 0).toFixed(0)}s`}
+              ? `GNSS locked · ${frame.gnss.satellitesUsed} sats`
+              : `GNSS denied · ${(frame?.gnss.secondsSinceFix ?? 0).toFixed(0)}s`}
           </span>
         </div>
       </footer>
