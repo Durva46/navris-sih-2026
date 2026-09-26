@@ -184,17 +184,23 @@ export function DataSourceBadge({ compact = false }: { compact?: boolean }) {
     >
       <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${spec.dot}`} />
       {/*
-        The full label ("Simulation / Demo Mode") is roughly 200px of unbreakable
-        mono at this tracking, which is more than a 320px header can spare. The
-        abbreviation is the same fact, and `title` still carries the full
-        sentence on hover, so nothing is actually lost.
+        The full label ("Simulation / Demo Mode") measures 209px at this
+        tracking. That is unaffordable anywhere except a genuinely wide header:
+        the wordmark, the divider, the badges, the view switcher and the scenario
+        readout want 727px before the state column is counted, so the long form
+        cost the state heading its width — measured 138px of a 1024px row at
+        1024, and worse than that at 1280, where the long form itself appears and
+        squeezes the column to 117px. The state is the most important thing on
+        screen, so the long form is held back to `2xl` (1536px), which is the
+        first width where the state column is wider than the longest label at its
+        full 36px. `title` still carries the full sentence, so nothing is lost.
       */}
       {compact ? (
         spec.short
       ) : (
         <>
-          <span className="lg:hidden">{spec.short}</span>
-          <span className="hidden lg:inline">{spec.long}</span>
+          <span className="2xl:hidden">{spec.short}</span>
+          <span className="hidden 2xl:inline">{spec.long}</span>
         </>
       )}
     </span>

@@ -19,6 +19,34 @@ import { useMemo, useState } from 'react';
 import type { DataSourceLabel } from '@/types/navigation';
 
 /**
+ * The shared time axis for every chart on this page.
+ *
+ * Recharts defaults `XAxis` to `type="category"`, which treats each row as a
+ * discrete label rather than a position on a scale. History is sampled well faster
+ * than once a second, so `t` is fractional, and a category axis labelled with
+ * `toFixed(0)` rendered that fraction away — a 180s window came out as
+ * "0s 0s 1s 1s 1s 2s …", with several ticks carrying a label that was already
+ * used further along the axis.
+ *
+ * `type="number"` puts the axis on the real time scale, so Recharts chooses ticks
+ * from the data domain and every label is distinct. `allowDecimals={false}` keeps
+ * them whole seconds so the labels stay short. It also makes the GNSS outage
+ * bands correct: `<ReferenceArea x1={from} x2={to}>` is given second offsets, which
+ * a numeric axis places properly and a category axis could not.
+ *
+ * Defined once because six hand-copied axes is six chances to reintroduce the bug.
+ */
+const TIME_AXIS = {
+  type: 'number' as const,
+  dataKey: 't',
+  domain: ['dataMin', 'dataMax'] as [string, string],
+  allowDecimals: false,
+  stroke: '#3A4557',
+  tick: { fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' },
+  tickFormatter: (v: number) => `${v.toFixed(0)}s`,
+};
+
+/**
  * Analytics / Research.
  *
  * A secondary view for judges who probe deeper and for the team while building.
@@ -126,7 +154,7 @@ export default function AnalyticsPage() {
             <LineChart data={data} margin={{ top: 6, right: 12, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="#1B2537" strokeDasharray="2 4" />
               <OutageBands bands={outageBands} />
-              <XAxis dataKey="t" stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} tickFormatter={(v: number) => `${v.toFixed(0)}s`} />
+              <XAxis {...TIME_AXIS} />
               <YAxis stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} width={40} tickFormatter={(v: number) => `${v.toFixed(1)}`} />
               <Tooltip content={<ChartTooltip unit="m" />} />
               <Legend wrapperStyle={{ fontSize: 10, fontFamily: 'JetBrains Mono' }} />
@@ -146,7 +174,7 @@ export default function AnalyticsPage() {
             <LineChart data={data} margin={{ top: 6, right: 12, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="#1B2537" strokeDasharray="2 4" />
               <OutageBands bands={outageBands} />
-              <XAxis dataKey="t" stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} tickFormatter={(v: number) => `${v.toFixed(0)}s`} />
+              <XAxis {...TIME_AXIS} />
               <YAxis stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} width={40} tickFormatter={(v: number) => v.toFixed(1)} />
               <Tooltip content={<ChartTooltip unit="m" />} />
               <Legend wrapperStyle={{ fontSize: 10, fontFamily: 'JetBrains Mono' }} />
@@ -165,7 +193,7 @@ export default function AnalyticsPage() {
             <LineChart data={data} margin={{ top: 6, right: 12, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="#1B2537" strokeDasharray="2 4" />
               <OutageBands bands={outageBands} />
-              <XAxis dataKey="t" stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} tickFormatter={(v: number) => `${v.toFixed(0)}s`} />
+              <XAxis {...TIME_AXIS} />
               <YAxis yAxisId="l" stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} width={40} />
               <YAxis yAxisId="r" orientation="right" stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} width={34} />
               <Tooltip content={<ChartTooltip unit="" />} />
@@ -186,7 +214,7 @@ export default function AnalyticsPage() {
               <CartesianGrid stroke="#1B2537" strokeDasharray="2 4" />
               <ReferenceArea y1={9.3} y2={9.3} fill="#F04E3E" fillOpacity={0.12} />
               <OutageBands bands={outageBands} />
-              <XAxis dataKey="t" stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} tickFormatter={(v: number) => `${v.toFixed(0)}s`} />
+              <XAxis {...TIME_AXIS} />
               <YAxis stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} width={40} />
               <Tooltip content={<ChartTooltip unit="" />} />
               <Legend wrapperStyle={{ fontSize: 10, fontFamily: 'JetBrains Mono' }} />
@@ -204,7 +232,7 @@ export default function AnalyticsPage() {
           <ResponsiveContainer width="100%" height={150}>
             <LineChart data={data} margin={{ top: 6, right: 12, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="#1B2537" strokeDasharray="2 4" />
-              <XAxis dataKey="t" stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} tickFormatter={(v: number) => `${v.toFixed(0)}s`} />
+              <XAxis {...TIME_AXIS} />
               <YAxis domain={[0, 1]} stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} width={40} tickFormatter={(v: number) => (v > 0.5 ? 'LOCK' : 'LOST')} />
               <Tooltip content={<ChartTooltip unit="" />} />
               <OutageBands bands={outageBands} />
@@ -223,7 +251,7 @@ export default function AnalyticsPage() {
             <LineChart data={data} margin={{ top: 6, right: 12, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="#1B2537" strokeDasharray="2 4" />
               <OutageBands bands={outageBands} />
-              <XAxis dataKey="t" stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} tickFormatter={(v: number) => `${v.toFixed(0)}s`} />
+              <XAxis {...TIME_AXIS} />
               <YAxis stroke="#3A4557" tick={{ fill: '#5A6781', fontSize: 9, fontFamily: 'JetBrains Mono' }} width={40} />
               <Tooltip content={<ChartTooltip unit="" />} />
               <Legend wrapperStyle={{ fontSize: 10, fontFamily: 'JetBrains Mono' }} />

@@ -308,6 +308,12 @@ export function MapLibreView() {
       }
       // Compliance: the library renders the source's own attribution, linked.
       map.addControl(new AttributionControl({ compact: false }), 'bottom-right');
+      // Resize once the style is live. A ResizeObserver alone is not enough: if
+      // the container was measured as 0 when the map was constructed, the
+      // observed box never changes size, so no further callback ever fires and
+      // the map stays collapsed. An unconditional resize after load breaks that
+      // deadlock by re-reading the container, whatever it currently is.
+      map.resize();
       setReady(true);
       setStatus('ready');
     });
@@ -344,6 +350,10 @@ export function MapLibreView() {
     if (!ready) return;
     const map = mapRef.current;
     if (!map) return;
+    // Belt and braces alongside the ResizeObserver: a late layout change (fonts
+    // settling, the intro section reflowing, a scrollbar appearing) can change
+    // the container without the observer having been attached yet.
+    map.resize();
     const origin = DEMO_ORIGIN;
 
     let raf = 0;
@@ -468,7 +478,16 @@ export function MapLibreView() {
 
   return (
     <>
-      <div ref={containerRef} className="absolute inset-0" />
+      {/* The MapLibre container must be sized by HEIGHT, never by `absolute inset-0`.
+          MapLibre adds its own `maplibregl-map` class to this element, and that
+          class carries `position: relative`. Its stylesheet is emitted as a lazy
+          chunk, so it is injected after Tailwind's utilities and wins the cascade
+          at equal specificity — which silently turns `absolute` back into
+          `relative`. `inset-0` is then inert, `height: auto` resolves against an
+          element whose only child (the canvas) is absolutely positioned, and the
+          container collapses to 0. A plain block with `h-full` is immune: the
+          overridden `position` no longer matters. */}
+      <div ref={containerRef} className="h-full w-full" />
       <MapOverlays
         status={status}
         following={following}
@@ -541,14 +560,6 @@ function MapOverlays({
   scale: number;
   hasFrame: boolean;
 }) {
-  const frame = useFrameAt(250);
-  const denying = frame ? selectIsDenyingGnss(frame) : false;
-  const held = frame && denying ? lastGnssEnu(frame) : null;
-  const divergence =
-    held && frame
-      ? Math.hypot(held.east - frame.navris.enu.east, held.north - frame.navris.enu.north)
-      : 0;
-
   if (!hasFrame) {
     return (
       <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-base-850">
@@ -602,17 +613,6 @@ function MapOverlays({
         >
           Recentre on vehicle
         </button>
-      )}
-
-      {held && frame && (
-        <div
-          className="pointer-events-none absolute right-3 top-3 z-10 flex flex-col items-end gap-0.5 text-right"
-          role="status"
-        >
-          <span className="readout text-[9px] uppercase tracking-[0.12em] text-ink-dim">GNSS fix held</span>
-          <span className="readout text-[11px] text-ink-muted">{divergence.toFixed(1)} m</span>
-          <span className="readout text-[9px] text-ink-dim">age {frame.gnss.secondsSinceFix.toFixed(1)} s</span>
-        </div>
       )}
 
       <ScaleBar metres={scale} />

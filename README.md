@@ -7,17 +7,29 @@ NAVRIS — Intelligent Navigation & Inertial System. React + TypeScript front en
 > the scientific boundary between navigation and visualisation. This README describes only what
 > is built and working today.
 
+**Repository status.** This repository is the frontend and is self-contained: it
+builds, runs, and passes its acceptance suite with no backend and no network
+service. The backend and research (recorded-dataset replay) repositories are not
+published yet. The integration point is `DataAdapter` in
+[`src/adapters/DataAdapter.ts`](./src/adapters/DataAdapter.ts) and nothing else —
+see [Swapping in real data](#swapping-in-real-data) for the contract a backend
+has to satisfy.
+
 **Everything this app shows is simulated.** There is no real sensor, no real GNSS
 receiver, and no trained model behind the numbers. Every frame and every event is
 stamped `DEMO_SIMULATED`, and the UI labels it as such in the top bar. The
 simulation is deterministic (seeded, no `Math.random()`), so a judge who resets the
 demo sees the exact same run twice.
 
-**The map is currently a placeholder, not a real geographic map.** It is a hand-painted
-Canvas2D grid with no tiles, no basemap, and no coordinate reference beyond the local ENU
-frame. The strategy specifies a real MapLibre + OSM-derived basemap and marks replacing
-this as required work. Nothing in the navigation logic depends on the current map, which is
-precisely why it can be swapped without touching the engine.
+**The map is a real geographic map.** It is MapLibre GL with OpenStreetMap standard
+raster tiles, drawn under the vehicle's local ENU frame. The tile source is isolated
+in [`src/map/provider.ts`](./src/map/provider.ts), which knows nothing about
+navigation, the filter, or React, so a provider swap is a config change. The
+OpenStreetMap credit is rendered on the map at all times and the official tile
+infrastructure's usage policy forbids production use — this is a demonstration
+configuration, and pointing `VITE_MAP_*` at a commercial tile provider needs no
+code change (see [Configuration](#configuration)). If tiles fail to load, the map
+says so and the navigation stack is unaffected.
 
 ## The demo, in one sentence
 
@@ -44,6 +56,26 @@ npm run verify     # headless acceptance suite (see below)
 ```
 
 On Windows use `npm.cmd` if PowerShell blocks `npm.ps1` with a script-policy error.
+
+## Configuration
+
+There is no configuration file and no secret in this repository. The only optional
+settings are environment variables, all optional, all read at build time:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `VITE_MAP_TILE_URL` | OSM standard raster tiles | Raster tile template with `{z}/{x}/{y}`, or point `VITE_MAP_STYLE_URL` at a vector style instead |
+| `VITE_MAP_PROVIDER_ID` | `osm-raster` | Stable identifier for the active provider |
+| `VITE_MAP_PROVIDER_LABEL` | `OpenStreetMap (raster)` | Name shown in the system panel |
+| `VITE_MAP_ATTRIBUTION` | `© OpenStreetMap contributors` | Credit line. Never blank — an override that omits it falls back to the OSM credit rather than rendering nothing, because dropping the credit is a licence violation |
+| `VITE_MAP_ATTRIBUTION_URL` | OSM copyright page | Where the credit links to |
+| `VITE_MAP_TERMS_URL` | OSM tile usage policy | Provider terms, shown alongside the credit |
+
+The default is appropriate for a low-volume demonstration and **not** for
+deployment: the OpenStreetMap Foundation's
+[tile usage policy](https://operations.osmfoundation.org/policies/tiles/) forbids
+production and high-volume use. Bulk offline tile caching is deliberately not
+implemented — it would need its own cache-invalidation policy and licence review.
 
 ## The product claim, and how it is checked
 
@@ -118,7 +150,12 @@ src/
   sim/          deterministic simulation: engine, ESKF, state machine, scenarios
   adapters/     the data-source boundary (see below)
   nav/          store, hooks, React context — the app talks only to this
+  map/          basemap tile provider — which geographic data, and nothing else
   components/   map, HUD, panels, simulation drawer, analytics
+  pages/        LiveNavigation, Analytics, and the other routes
+  theme/        state → colour and label mapping, shared by every layer
+  content/      copy: scenario descriptions, glossary, research notes
+  lib/          small shared helpers
   types/        the shared vocabulary every layer agrees on
 scripts/
   verify-demo.mjs   headless acceptance suite

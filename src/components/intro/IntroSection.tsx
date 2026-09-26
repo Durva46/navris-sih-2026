@@ -26,6 +26,13 @@ import { ChevronDown, FlaskConical, Gauge, HelpCircle, MapPin, MonitorPlay } fro
  * on a phone because the body carries its own `max-h` and scroll, so the cockpit
  * below always keeps the remaining viewport rather than being pushed off-screen.
  *
+ * It is safe to be open on a *short desktop window* for the same reason, with one
+ * addition: above `lg` the section itself is capped at 16vh. The introduction has
+ * enough content to fill a third of a laptop screen, and the cockpit underneath it
+ * — map, telemetry, event timeline — is the actual demonstration. A scrollable
+ * briefing is a fair trade for a usable map; an unusable map with a complete
+ * briefing above it is not.
+ *
  * Native <details> rather than a JS disclosure: it is keyboard-operable and
  * announced correctly with no script, and it costs nothing when closed.
  */
@@ -34,10 +41,22 @@ export function IntroSection() {
     <section
       aria-labelledby="intro-heading"
       data-qa="intro"
-      className="shrink-0 border-b border-hairline bg-surface"
+      /* `lg:max-h-[16vh]` is the load-bearing part of the desktop contract. The
+         introduction is open by default and full of real content, and at 1024x768
+         it measured 329px of a 614px column — which left the map 85px. The map is
+         the product; the introduction is a briefing, and a briefing that scrolls
+         is still a briefing.
+
+         16vh rather than "as much as possible" because the rest of the desktop
+         column has a fixed cost: 285px of map floor, 200px of timeline, and a
+         header that measures 115px in a calm state but 154px when the state chip
+         wraps to a second line. At 768px tall that leaves 129px for the
+         introduction, and this cap is what protects it. The introduction keeps
+         its full content — it scrolls. */
+      className="shrink-0 border-b border-hairline bg-surface lg:max-h-[16vh]"
     >
       <details open className="group">
-        <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2.5 px-3 py-2.5 sm:px-4 [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-9 shrink-0 cursor-pointer list-none items-center gap-2.5 px-3 py-2.5 sm:px-4 [&::-webkit-details-marker]:hidden">
           <HelpCircle size={13} className="shrink-0 text-ink-dim" aria-hidden />
           <h2
             id="intro-heading"
@@ -56,8 +75,18 @@ export function IntroSection() {
         </summary>
 
         {/* The body scrolls independently so the intro can never squeeze the
-            cockpit out of the viewport on a short screen. */}
-        <div className="max-h-[52vh] overflow-y-auto border-t border-hairline px-3 py-3 sm:px-4 lg:max-h-[38vh]">
+            cockpit out of the viewport on a short screen.
+
+            The desktop cap is `calc(16vh - 2.25rem)` rather than a flex `flex-1`,
+            and that is deliberate. `flex-1` on this element looks like the obvious
+            way to share the section's height, but it silently does nothing: Chrome
+            gives `<details>` an anonymous `::details-content` box, so the body's
+            flex parent is that box, not the flex container this section sets up.
+            Measured at 1024x768, the body was 709px tall inside a 168px section —
+            the intro was drawing straight over the map. Subtracting the summary
+            row's 2.25rem from the section cap constrains the body directly, with
+            no dependence on how the browser wraps details content. */}
+        <div className="max-h-[52vh] overflow-y-auto border-t border-hairline px-3 py-3 sm:px-4 lg:max-h-[calc(16vh_-_2.25rem)]">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <Card icon={MapPin} title="The problem">
               <p>
